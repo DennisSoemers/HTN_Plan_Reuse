@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "HTN Plugin",
+	"Description": "Plugin that adds a Hierarchical Task Network (HTN) Planner to Unreal Engine 4.",
+	"Category": "Artificial Intelligence",
+	"CreatedBy": "Dennis Soemers",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"Modules": [
+		{
+			"Name": "HTN_Plugin",
+			"Type": "Developer",
+			"LoadingPhase": "PreDefault"
+		}
+	],
+	"EnabledByDefault": false,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false
+}
