@@ -29,7 +29,6 @@ UHTNPlannerComponent::UHTNPlannerComponent(const FObjectInitializer& ObjectIniti
 	PreviousPlan = nullptr;
 	NumStackElements = 0;
 
-	bAdaptivePlanReuse = false;
 	DefaultMinMatchingStreakLength = 10;
 	MinMatchingStreakLength = DefaultMinMatchingStreakLength;
 
@@ -67,18 +66,13 @@ void UHTNPlannerComponent::AddStackElement(const FHTNStackElement& StackElement)
 				// this node is continuing a streak
 				StreakStacks[CurrentMatchingStreakLength].Push(StackElement);
 				MaxCurrentMatchingStreakLength = FMath::Max(MaxCurrentMatchingStreakLength, CurrentMatchingStreakLength);
-				//MinMatchingStreakLength = MaxCurrentMatchingStreakLength;
 			}
 			else if(MaxCurrentMatchingStreakLength > 0)
 			{
 				// this node is no longer continuing a streak, but it did previously have a streak
-				//int32 LongestOldStreak = StackElement.Plan->GetLongestMatchingStreak(PreviousPlan, MinMatchingStreakLength);
-				//StreakEndedQueues[LongestOldStreak].Enqueue(StackElement);
 				StreakEndedQueues[MaxCurrentMatchingStreakLength].Enqueue(StackElement);
 				MaxEndedMatchingStreakLength = FMath::Max(MaxEndedMatchingStreakLength, 
-														  MaxCurrentMatchingStreakLength/*LongestOldStreak*/);
-				//StreakEndedQueues[1].Enqueue(StackElement);
-				//MaxEndedMatchingStreakLength = 1;
+														  MaxCurrentMatchingStreakLength);
 			}
 			else if(MaxPastMatchingStreakLength > 0)
 			{
@@ -128,8 +122,6 @@ FHTNStackElement UHTNPlannerComponent::PopStackElement()
 			}
 			else if(MaxCurrentMatchingStreakLength > 0)
 			{
-				//UE_LOG(LogHTNPlanner, Warning, TEXT("Popping from StreakStacks with MaxCurrentMatchingStreakLength = %d"),
-				//	   MaxCurrentMatchingStreakLength);
 				// we can pop a node that's currently in a matching streak
 				return StreakStacks[MaxCurrentMatchingStreakLength].Pop(false);
 			}
@@ -293,8 +285,6 @@ void UHTNPlannerComponent::OnTaskFinished(TSharedPtr<FHTNTaskInstance> TaskInsta
 
 	if(TaskResult != EHTNExecutionResult::InProgress)
 	{
-		//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Yellow, TEXT("UHTNPlannerComponent::OnTaskFinished()"));
-
 		// cleanup task observers
 		UnregisterMessageObserversFrom(TaskInstance);
 
@@ -358,14 +348,6 @@ void UHTNPlannerComponent::ProcessExecutionRequest()
 		return;
 	}
 
-	/**
-	 * Implementation of the following algorithm that searches for the plan based on:
-	 *	Menif, A., Jacopin, É., & Cazenave, T. (2014). SHPE: HTN Planning for Video Games.
-	 *	In Computer Games (pp. 119-132). Springer International Publishing.
-	 *
-	 * (link: http://www.lamsade.dauphine.fr/~cazenave/papers/MenifCGW2014.pdf)
-	 */
-
 	if(NumStackElements == 0)
 	{
 		//BestPlan = nullptr;
@@ -411,6 +393,11 @@ void UHTNPlannerComponent::ProcessExecutionRequest()
 		++NumNodesExpanded;
 #endif
 
+		if(PreviousPlan.IsValid())
+		{
+			UE_LOG(LogHTNPlanner, Warning, TEXT("%d nodes in data structure(s)"), NumStackElements);
+		}
+
 		if(bProbabilisticPlanReuse && bHitLeaf)
 		{
 			// we've hit a leaf node, so it's time to re-evaluate whether we're ignoring plan reuse probabilistically
@@ -440,16 +427,6 @@ void UHTNPlannerComponent::ProcessExecutionRequest()
 
 			if(PreviousPlan.IsValid())	// we're doing plan reuse
 			{
-				//if(bAdaptivePlanReuse)
-				//{
-				//	++NumLeaves;
-				//	TotalLeafStreakLengths += StackTop.Plan->GetLongestMatchingStreak(PreviousPlan, MinMatchingStreakLength);
-				//}
-				//if(bProbabilisticPlanReuse)
-				//{
-				//	bHitLeaf = true;
-				//}
-
 				// verify that all of our values of maximum streak lengths among unprocessed nodes are still correct
 				UpdateMaxStreakLengths();
 			}
@@ -494,11 +471,6 @@ void UHTNPlannerComponent::ProcessExecutionRequest()
 
 			if(PreviousPlan.IsValid())	// we're doing plan reuse
 			{
-				/*if(bAdaptivePlanReuse)
-				{
-					++NumLeaves;
-					TotalLeafStreakLengths += StackTop.Plan->GetLongestMatchingStreak(PreviousPlan, MinMatchingStreakLength);
-				}*/
 				if(bProbabilisticPlanReuse)
 				{
 					bHitLeaf = true;
@@ -547,11 +519,6 @@ void UHTNPlannerComponent::ProcessExecutionRequest()
 				}
 				else if(PreviousPlan.IsValid())
 				{
-					/*if(bAdaptivePlanReuse)
-					{
-						++NumLeaves;
-						TotalLeafStreakLengths += StackTop.Plan->GetLongestMatchingStreak(PreviousPlan, MinMatchingStreakLength);
-					}*/
 					if(bProbabilisticPlanReuse)
 					{
 						bHitLeaf = true;
@@ -573,11 +540,6 @@ void UHTNPlannerComponent::ProcessExecutionRequest()
 
 					if(Decompositions.Num() == 0)	// leaf node
 					{
-						/*if(bAdaptivePlanReuse)
-						{
-							++NumLeaves;
-							TotalLeafStreakLengths += StackTop.Plan->GetLongestMatchingStreak(PreviousPlan, MinMatchingStreakLength);
-						}*/
 						if(bProbabilisticPlanReuse)
 						{
 							bHitLeaf = true;
@@ -1120,15 +1082,4 @@ void UHTNPlannerComponent::UpdateMaxStreakLengths()
 			break;
 		}
 	}
-
-	/*if(bAdaptivePlanReuse && NumLeaves > 0)
-	{
-		//int32 Previous = MinMatchingStreakLength;
-		MinMatchingStreakLength = FMath::Max(DefaultMinMatchingStreakLength, (int32)(1.1f * (TotalLeafStreakLengths / NumLeaves)));
-
-		//if(MinMatchingStreakLength != Previous)
-		//{
-			//UE_LOG(LogHTNPlanner, Warning, TEXT("Setting MinMatchingStreakLength to %d"), MinMatchingStreakLength);
-		//}
-	}*/
 }

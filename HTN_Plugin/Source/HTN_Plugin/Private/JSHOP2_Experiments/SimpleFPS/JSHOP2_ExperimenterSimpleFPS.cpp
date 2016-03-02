@@ -82,6 +82,8 @@ void AJSHOP2_ExperimenterSimpleFPS::InitializeWorldState(FHTNWorldState_SimpleFP
 
 		//InitializationSeed = 27207;
 
+		//InitializationSeed = 13123;
+
 		InitializationSeed = FMath::Rand();
 		bInitializationSeedSet = true;
 		HTNComp->DataCollector->SetWorldStateSeed(InitializationSeed);

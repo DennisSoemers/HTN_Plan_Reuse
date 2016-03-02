@@ -23,15 +23,10 @@ public:
 	void AppendTaskInstance(const TSharedPtr<FHTNTaskInstance>& NewTaskInstance);
 	void AppendTaskInstances(const TArray<TSharedPtr<FHTNTaskInstance>>& NewTaskInstances);
 	TSharedPtr<FHTNPlan> Copy();
-	int32 GetLastStreakScore(const TSharedPtr<FHTNPlan>& OtherPlan, int32 MinStreakLength) const;
 	int32 GetLongestMatchingStreak(const TSharedPtr<FHTNPlan>& OtherPlan, int32 MinStreakLength) const;
-	int32 GetMatchingCompounds(const TSharedPtr<FHTNPlan>& OtherPlan, const TSharedPtr<FHTNTaskInstance>& TaskNetwork) const;
 	int32 GetMatchingStreak(const TSharedPtr<FHTNPlan>& OtherPlan, int32 MinStreakLength) const;
 	int32 GetPlanSize() const;
-	int32 GetPotentialSimilarity(const TSharedPtr<FHTNPlan>& OtherPlan, const TSharedPtr<FHTNTaskInstance>& TaskNetwork) const;
 	int32 GetRemainingPlanSize() const;
-	int32 GetSimilarity(const TSharedPtr<FHTNPlan>& OtherPlan, const TSharedPtr<FHTNTaskInstance>& TaskNetwork) const;
-	int32 GetStreakScore(const TSharedPtr<FHTNPlan>& OtherPlan, int32 MinStreakLength) const;
 	TSharedPtr<FHTNTaskInstance> GetTaskInstanceToExecute();
 	const TArray<TSharedPtr<FHTNTaskInstance>>& GetSearchHistory() const;
 	const TArray<TSharedPtr<FHTNTaskInstance>>& GetTasks() const;

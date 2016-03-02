@@ -224,8 +224,6 @@ protected:
 	/** Flag used for probabilistic plan reuse */
 	uint8 bIgnoringPlanReuse : 1;
 
-	/** If true, plan reuse uses an adaptive minimum streak length instead of a constant */
-	uint8 bAdaptivePlanReuse : 1;
 	/** If true, we do a depth-first search. Otherwise, breadth-first/A* style search */
 	uint8 bDepthFirstSearch : 1;
 	/** if set, execution requests will be postponed */
